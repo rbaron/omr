@@ -234,16 +234,16 @@ def main():
     answers, im = get_answers(args.input)
 
     for i, answer in enumerate(answers):
-        print "Q{}: {}".format(i + 1, answer)
+        print("Q{}: {}".format(i + 1, answer))
 
     if args.output:
         cv2.imwrite(args.output, im)
-        print "Wrote image to {}".format(args.output)
+        print("Wrote image to {}".format(args.output))
 
     if args.show:
         cv2.imshow('trans', im)
 
-        print "Close image window and hit ^C to quit."
+        print("Close image window and hit ^C to quit.")
         while True:
             cv2.waitKey()
 
