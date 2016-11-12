@@ -1,6 +1,6 @@
 # omr
 
-omr is a simple python2 **o**ptical **m**ark **r**ecognition script. It takes as input an image of an answered answer sheet and outputs which alternatives that person marked. Scroll down for an example.
+omr is a simple python2 **o**ptical **m**ark **r**ecognition script. It takes as input an image of an answered answer sheet and outputs which alternatives were marked. Scroll down for an example.
 
 ## Usage
 ```sh
@@ -33,11 +33,11 @@ Q10: N/A
 
 In this case, we used the following image as input:
 
-<img src="http://i.imgur.com/JTAgYNF.jpg" alt="Input" style="width: 200px;"/>
+<img src="http://i.imgur.com/JTAgYNF.jpg" alt="Input" style="max-width: 50%;"/>
 
 And got the following output:
 
-<img src="http://i.imgur.com/4n9fKFF.png" alt="Output" style="width: 200px;"/>
+<img src="http://i.imgur.com/4n9fKFF.png" alt="Output" style="max-width: 50%;"/>
 
 ## Anwer Sheet
 
