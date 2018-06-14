@@ -116,10 +116,10 @@ def perspective_transform(img, points):
     return warped
 
 def sheet_coord_to_transf_coord(x, y):
-    return map(lambda n: int(np.round(n)), (
+    return list(map(lambda n: int(np.round(n)), (
         TRANSF_SIZE * x/744.055,
         TRANSF_SIZE * (1 - y/1052.362)
-    ))
+    )))
 
 def get_question_patch(transf, q_number):
     # Top left
@@ -136,11 +136,11 @@ def get_question_patch(transf, q_number):
     return transf[tl[1]:br[1], tl[0]:br[0]]
 
 def get_question_patches(transf):
-    for i in xrange(1, 11):
+    for i in range(1, 11):
         yield get_question_patch(transf, i)
 
 def get_alternative_patches(question_patch):
-    for i in xrange(5):
+    for i in range(5):
         x0, _ = sheet_coord_to_transf_coord(100 * i, 0)
         x1, _ = sheet_coord_to_transf_coord(50 + 100 * i, 0)
         yield question_patch[:, x0:x1]
@@ -152,7 +152,7 @@ def draw_marked_alternative(question_patch, index):
     draw_point((cx, TRANSF_SIZE - cy), question_patch, radius=5, color=(255, 0, 0))
 
 def get_marked_alternative(alternative_patches):
-    means = map(np.mean, alternative_patches)
+    means = list(map(np.mean, alternative_patches))
     sorted_means = sorted(means)
 
     # Simple heuristic
