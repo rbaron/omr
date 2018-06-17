@@ -42,3 +42,23 @@ And got the following output:
 ## Anwer Sheet
 
 The answer sheet is available in the `sheet/` directory.
+
+## Development
+
+### Run unit test
+
+`test_omr.py` contains unit tests that can be run using:
+
+```bash
+$ py.test
+======================================================== test session starts =========================================================
+platform darwin -- Python 3.6.5, pytest-3.5.1, py-1.5.3, pluggy-0.6.0
+rootdir: /Users/user/omr, inifile:
+plugins: remotedata-0.2.1, openfiles-0.3.0, doctestplus-0.1.3, arraydiff-0.2
+collected 1 item
+
+test_omr.py .                                                                                                                  [100%]
+
+====================================================== 1 passed in 1.61 seconds ======================================================
+
+```
