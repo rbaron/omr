@@ -45,7 +45,7 @@ The answer sheet is available in the `sheet/` directory.
 
 ## Development
 
-### Run unit test
+### Run unit tests
 
 `test_omr.py` contains unit tests that can be run using:
 
