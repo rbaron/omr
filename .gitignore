@@ -1,1 +1,13 @@
+# Vim swap files
 *.swp
+
+# Python byte-compiled stuff
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtualenv
+venv/
+
+# macos directory settings
+.DS_Store
