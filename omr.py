@@ -16,7 +16,7 @@ ANSWER_PATCH_HEIGHT = 50
 ANSWER_PATCH_HEIGHT_WITH_MARGIN = 80
 ANSWER_PATCH_LEFT_MARGIN = 200
 ANSWER_PATCH_RIGHT_MARGIN = 90
-FIRST_ANSWER_PATCH_TOP_Y = 850
+FIRST_ANSWER_PATCH_TOP_Y = 200
 
 ALTERNATIVE_HEIGHT = 50
 ALTERNATIVE_WIDTH = 50
@@ -192,7 +192,7 @@ def perspective_transform(img, points):
 def sheet_coord_to_transf_coord(x, y):
     return list(map(lambda n: int(np.round(n)), (
         TRANSF_SIZE * x / ANSWER_SHEET_WIDTH,
-        TRANSF_SIZE * (1 - y / ANSWER_SHEET_HEIGHT)
+        TRANSF_SIZE * y / ANSWER_SHEET_HEIGHT
     )))
 
 
@@ -200,16 +200,15 @@ def get_question_patch(transf, q_number):
     """Exracts a region of interest (ROI) of a single question."""
     # Top left of question patch q_number
     tl = sheet_coord_to_transf_coord(
-        #200,
         ANSWER_PATCH_LEFT_MARGIN,
-        FIRST_ANSWER_PATCH_TOP_Y - ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
+        FIRST_ANSWER_PATCH_TOP_Y + ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
     )
 
     # Bottom right of question patch q_number
     br = sheet_coord_to_transf_coord(
         ANSWER_SHEET_WIDTH - ANSWER_PATCH_RIGHT_MARGIN,
-        FIRST_ANSWER_PATCH_TOP_Y -
-            ANSWER_PATCH_HEIGHT -
+        FIRST_ANSWER_PATCH_TOP_Y +
+            ANSWER_PATCH_HEIGHT +
             ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
     )
     return transf[tl[1]:br[1], tl[0]:br[0]]
@@ -231,7 +230,7 @@ def draw_marked_alternative(question_patch, index):
     cx, cy = sheet_coord_to_transf_coord(
         ALTERNATIVE_WIDTH * (2 * index + .5),
         ALTERNATIVE_HEIGHT / 2)
-    draw_point((cx, TRANSF_SIZE - cy), question_patch, radius=5, color=(255, 0, 0))
+    draw_point((cx, cy), question_patch, radius=5, color=(255, 0, 0))
 
 
 def get_marked_alternative(alternative_patches):
