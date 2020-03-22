@@ -1,21 +1,19 @@
 # omr
-
-omr is a simple python2 **o**ptical **m**ark **r**ecognition script. It takes as input an image of an answered answer sheet and outputs which alternatives were marked. Scroll down for an example.
+omr is a small Python 3 **o**ptical **m**ark **r**ecognition script. It takes as input an image of an answered answer sheet and outputs which alternatives were marked. The project is generally optimized for conciseness and teachability, and the goal is to provide a reasonable starting point for learning and hopefully building more powerful applications.
 
 ## Usage
 ```sh
-$ python2 omr.py --help
+$ python omr.py --help
 usage: omr.py [-h] --input INPUT [--output OUTPUT] [--show]
 
 optional arguments:
   -h, --help       show this help message and exit
   --input INPUT    Input image filename
-  --output OUTPUT  Output image filename
+  --output OUTPUT  Output annotated image filename
   --show           Displays annotated image
 ```
 
 ## Example
-
 ```sh
 $ python omr.py --input img/answered-sheet-photo.jpg  --output /tmp/results.png --show
 
@@ -39,26 +37,31 @@ And got the following output:
 
 <img src="http://i.imgur.com/4n9fKFF.png" alt="Output" style="max-width: 50%;"/>
 
-## Anwer Sheet
+## Installation
+### Using virtualenv
+```sh
+$ git clone https://github.com/rbaron/omr
+$ cd omr/
+$ virtualenv --python=`which python3` venv
+(venv) $ pip install -r requirements.txt
+(venv) $ python omr.py --help
+```
 
+## Anwer Sheet
 The answer sheet is available in the `sheet/` directory.
 
 ## Development
-
 ### Run unit tests
-
 `test_omr.py` contains unit tests that can be run using:
 
 ```bash
 $ py.test
-======================================================== test session starts =========================================================
-platform darwin -- Python 3.6.5, pytest-3.5.1, py-1.5.3, pluggy-0.6.0
-rootdir: /Users/user/omr, inifile:
-plugins: remotedata-0.2.1, openfiles-0.3.0, doctestplus-0.1.3, arraydiff-0.2
+=========================================================== test session starts ===========================================================
+platform darwin -- Python 3.7.5, pytest-5.2.4, py-1.8.0, pluggy-0.13.0
 collected 1 item
 
-test_omr.py .                                                                                                                  [100%]
+test_omr.py .                                                                                                                       [100%]
 
-====================================================== 1 passed in 1.61 seconds ======================================================
-
+============================================================ 1 passed in 0.31s ============================================================
 ```
+
