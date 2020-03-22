@@ -63,7 +63,24 @@ def calculate_corner_features():
 
 
 def normalize(im):
-    return cv2.normalize(im, np.zeros(im.shape), 0, 255, norm_type=cv2.NORM_MINMAX)
+    """Converts image to black and white.
+
+    Applying a threshold to a grayscale image will make every pixel either
+    fully black or fully white. Before doing so, a common technique is to
+    get rid of noise (or super high frequency color change) by blurring the
+    grayscale image with a Gaussian filter."""
+    im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+
+    # Filter the grayscale image with a 3x3 kernel
+    blurred = cv2.GaussianBlur(im_gray, (3, 3), 0)
+
+    # Applies a Gaussian adaptive thresholding. In practive, adaptive thresholding
+    # seem to work better than appling a single, global threshold to the image.
+    # This is particularly important if there could be shadows or non-uniform
+    # lighting on the answer sheet. In those scenarios, using a global thresholding
+    # technique might yield paricularly bad results.
+    return cv2.adaptiveThreshold(
+        blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 77, 10)
 
 
 def get_approx_contour(contour, tol=.01):
@@ -217,13 +234,9 @@ def get_answers(source_file):
 
     im_orig = cv2.imread(source_file)
 
-    blurred = cv2.GaussianBlur(im_orig, (11, 11), 10)
+    im_normalized = normalize(im_orig)
 
-    im = normalize(cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY))
-
-    ret, im = cv2.threshold(im, 127, 255, cv2.THRESH_BINARY)
-
-    contours = get_contours(im)
+    contours = get_contours(im_normalized)
 
     corners = get_corners(contours)
 
