@@ -3,9 +3,24 @@ import cv2
 import math
 import numpy as np
 
-
+# When the four corners are identified, we will do a four-point
+# perspective transform such that the outmost points of each
+# corner maps to a TRANSF_SIZE x TRANSF_SIZE square image.
 TRANSF_SIZE = 512
 
+# Answer sheet geometry in pixels
+ANSWER_SHEET_WIDTH = 740
+ANSWER_SHEET_HEIGHT = 1049
+
+ANSWER_PATCH_HEIGHT = 50
+ANSWER_PATCH_HEIGHT_WITH_MARGIN = 80
+ANSWER_PATCH_LEFT_MARGIN = 200
+ANSWER_PATCH_RIGHT_MARGIN = 90
+FIRST_ANSWER_PATCH_TOP_Y = 850
+
+ALTERNATIVE_HEIGHT = 50
+ALTERNATIVE_WIDTH = 50
+ALTERNATIVE_WIDTH_WITH_MARGIN = 100
 
 def calculate_contour_features(contour):
     """Calculates interesting properties (features) of a contour.
@@ -79,6 +94,10 @@ def normalize(im):
     # This is particularly important if there could be shadows or non-uniform
     # lighting on the answer sheet. In those scenarios, using a global thresholding
     # technique might yield paricularly bad results.
+    # The choice of the parameters blockSize = 77 and C = 10 is as much as an art
+    # as a science and domain-dependand.
+    # In practice, you might want to try different  values for your specific answer
+    # sheet.
     return cv2.adaptiveThreshold(
         blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 77, 10)
 
@@ -97,10 +116,20 @@ def get_contours(image_gray):
 
 
 def get_corners(contours):
-    CORNER_FEATS = calculate_corner_features()
+    """Return the 4 contours that most look like a corner.
+
+    In practice, we cannot assume that the corners will always be present,
+    and we likely need to decide how good is good enough for contour to
+    look like a corner.
+    This is essentially a classification problem. A good approach would be
+    to train a statistical classifier model and apply it here. For our
+    exercise, we assume the corners are necessarily there."""
+    corner_features = calculate_corner_features()
     return sorted(
         contours,
-        key=lambda c: features_distance(CORNER_FEATS, calculate_contour_features(c)))[:4]
+        key=lambda c: features_distance(
+                corner_features,
+                calculate_contour_features(c)))[:4]
 
 
 def get_bounding_rect(contour):
@@ -162,22 +191,26 @@ def perspective_transform(img, points):
 
 def sheet_coord_to_transf_coord(x, y):
     return list(map(lambda n: int(np.round(n)), (
-        TRANSF_SIZE * x/744.055,
-        TRANSF_SIZE * (1 - y/1052.362)
+        TRANSF_SIZE * x / ANSWER_SHEET_WIDTH,
+        TRANSF_SIZE * (1 - y / ANSWER_SHEET_HEIGHT)
     )))
 
 
 def get_question_patch(transf, q_number):
-    # Top left
+    """Exracts a region of interest (ROI) of a single question."""
+    # Top left of question patch q_number
     tl = sheet_coord_to_transf_coord(
-        200,
-        850 - 80 * (q_number - 1)
+        #200,
+        ANSWER_PATCH_LEFT_MARGIN,
+        FIRST_ANSWER_PATCH_TOP_Y - ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
     )
 
-    # Bottom right
+    # Bottom right of question patch q_number
     br = sheet_coord_to_transf_coord(
-        650,
-        800 - 80 * (q_number - 1)
+        ANSWER_SHEET_WIDTH - ANSWER_PATCH_RIGHT_MARGIN,
+        FIRST_ANSWER_PATCH_TOP_Y -
+            ANSWER_PATCH_HEIGHT -
+            ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
     )
     return transf[tl[1]:br[1], tl[0]:br[0]]
 
@@ -189,15 +222,15 @@ def get_question_patches(transf):
 
 def get_alternative_patches(question_patch):
     for i in range(5):
-        x0, _ = sheet_coord_to_transf_coord(100 * i, 0)
-        x1, _ = sheet_coord_to_transf_coord(50 + 100 * i, 0)
+        x0, _ = sheet_coord_to_transf_coord(ALTERNATIVE_WIDTH_WITH_MARGIN * i, 0)
+        x1, _ = sheet_coord_to_transf_coord(ALTERNATIVE_WIDTH + ALTERNATIVE_WIDTH_WITH_MARGIN * i, 0)
         yield question_patch[:, x0:x1]
 
 
 def draw_marked_alternative(question_patch, index):
     cx, cy = sheet_coord_to_transf_coord(
-        50 * (2 * index + .5),
-        50/2)
+        ALTERNATIVE_WIDTH * (2 * index + .5),
+        ALTERNATIVE_HEIGHT / 2)
     draw_point((cx, TRANSF_SIZE - cy), question_patch, radius=5, color=(255, 0, 0))
 
 
