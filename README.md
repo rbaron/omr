@@ -1,4 +1,7 @@
 # omr
+
+![Python application](https://github.com/rbaron/omr/workflows/omr/badge.svg)
+
 omr is a small Python 3 **o**ptical **m**ark **r**ecognition script. It takes as input an image of an answered answer sheet and outputs which alternatives were marked. The project is generally optimized for conciseness and teachability, and the goal is to provide a reasonable starting point for learning and hopefully building more powerful applications.
 
 ## Usage
