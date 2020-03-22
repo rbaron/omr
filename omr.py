@@ -236,6 +236,15 @@ def draw_marked_alternative(question_patch, index):
 
 
 def get_marked_alternative(alternative_patches):
+    """Decives which alternative is marked.
+
+    Given a list of alternative patches, we need to decide which one,
+    if any, is marked. Here, we do a simple, hacky heuristic: the
+    alternative patch with lowest brightness (darker), is marked if
+    it is sufficiently darker than the _second_ darker alternative
+    patch.
+
+    In practice, a more robust, data-drive model might be more useful."""
     means = list(map(np.mean, alternative_patches))
     sorted_means = sorted(means)
 
@@ -253,13 +262,13 @@ def get_letter(alt_index):
 def get_answers(source_file):
     """Run the full pipeline:
 
-        - Load image
-        - Normalize image
-        - Find contours
-        - Find corners among all contours
-        - Find 'outmost' points of all corners
-        - Apply perpsective transform to get a bird's eye view
-        - Scan each line for the marked alternative
+    - Load image
+    - Normalize image
+    - Find contours
+    - Find corners among all contours
+    - Find 'outmost' points of all corners
+    - Apply perpsective transform to get a bird's eye view
+    - Scan each line for the marked alternative
     """
 
     corner_features = calculate_corner_features()
@@ -329,3 +338,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
