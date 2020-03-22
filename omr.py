@@ -4,12 +4,14 @@ import numpy as np
 
 # When the four corners are identified, we will do a four-point
 # perspective transform such that the outmost points of each
-# corner maps to a TRANSF_SIZE x TRANSF_SIZE square image.
+# corner map to a TRANSF_SIZE x TRANSF_SIZE square image.
 TRANSF_SIZE = 512
 
+#
+# Answer sheet properties.
+#
 N_QUESTIONS = 10
 
-# Answer sheet geometry in pixels
 ANSWER_SHEET_WIDTH = 740
 ANSWER_SHEET_HEIGHT = 1049
 
@@ -46,7 +48,7 @@ def calculate_contour_features(contour):
 
 def calculate_corner_features():
     """Calculates the array of features for the corner contour.
-    In practive, this can be pre-calculated, as the corners are constant
+    In practice, this can be pre-calculated, as the corners are constant
     and independent from the inputs.
 
     We load the img/corner.png file, which contains a single corner, so we
@@ -81,7 +83,7 @@ def calculate_corner_features():
 
 
 def normalize(im):
-    """Converts image to black and white.
+    """Converts `im` to black and white.
 
     Applying a threshold to a grayscale image will make every pixel either
     fully black or fully white. Before doing so, a common technique is to
@@ -92,8 +94,8 @@ def normalize(im):
     # Filter the grayscale image with a 3x3 kernel
     blurred = cv2.GaussianBlur(im_gray, (3, 3), 0)
 
-    # Applies a Gaussian adaptive thresholding. In practive, adaptive thresholding
-    # seem to work better than appling a single, global threshold to the image.
+    # Applies a Gaussian adaptive thresholding. In practice, adaptive thresholding
+    # seems to work better than appling a single, global threshold to the image.
     # This is particularly important if there could be shadows or non-uniform
     # lighting on the answer sheet. In those scenarios, using a global thresholding
     # technique might yield paricularly bad results.
@@ -106,26 +108,25 @@ def normalize(im):
 
 
 def get_approx_contour(contour, tol=.01):
-    """Get rid of 'useless' points in the contour"""
+    """Gets rid of 'useless' points in the contour."""
     epsilon = tol * cv2.arcLength(contour, True)
     return cv2.approxPolyDP(contour, epsilon, True)
 
 
 def get_contours(image_gray):
-    contours, hierarchy = cv2.findContours(
+    contours, _ = cv2.findContours(
         image_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
     return map(get_approx_contour, contours)
 
 
 def get_corners(contours):
-    """Return the 4 contours that most look like a corner.
+    """Returns the 4 contours that look like a corner the most.
 
-    In practice, we cannot assume that the corners will always be present,
+    In the real world, we cannot assume that the corners will always be present,
     and we likely need to decide how good is good enough for contour to
     look like a corner.
     This is essentially a classification problem. A good approach would be
-    to train a statistical classifier model and apply it here. For our
+    to train a statistical classifier model and apply it here. In our little
     exercise, we assume the corners are necessarily there."""
     corner_features = calculate_corner_features()
     return sorted(
@@ -156,8 +157,7 @@ def get_centroid(contour):
     return (x, y)
 
 
-def order_points(points):
-    """Order points counter-clockwise-ly."""
+def sort_points_counter_clockwise(points):
     origin = np.mean(points, axis=0)
 
     def positive_angle(p):
@@ -174,7 +174,8 @@ def get_outmost_points(contours):
 
 
 def perspective_transform(img, points):
-    """Transform img so that points are the new corners"""
+    """Applies a 4-point perspective transformation in `img` so that `points`
+    are the new corners."""
     source = np.array(
         points,
         dtype="float32")
@@ -237,7 +238,7 @@ def draw_marked_alternative(question_patch, index):
 
 
 def get_marked_alternative(alternative_patches):
-    """Decives which alternative is marked.
+    """Decides which alternative is marked, if any.
 
     Given a list of alternative patches, we need to decide which one,
     if any, is marked. Here, we do a simple, hacky heuristic: the
@@ -245,7 +246,7 @@ def get_marked_alternative(alternative_patches):
     it is sufficiently darker than the _second_ darker alternative
     patch.
 
-    In practice, a more robust, data-drive model might be more useful."""
+    In practice, a more robust, data-driven model is necessary."""
     means = list(map(np.mean, alternative_patches))
     sorted_means = sorted(means)
 
@@ -261,15 +262,15 @@ def get_letter(alt_index):
 
 
 def get_answers(source_file):
-    """Run the full pipeline:
+    """Runs the full pipeline:
 
-    - Load image
-    - Normalize image
-    - Find contours
-    - Find corners among all contours
-    - Find 'outmost' points of all corners
-    - Apply perpsective transform to get a bird's eye view
-    - Scan each line for the marked alternative
+    - Loads input image
+    - Normalizes image
+    - Finds contours
+    - Finds corners among all contours
+    - Finds 'outmost' points of all corners
+    - Applies perpsective transform to get a bird's eye view
+    - Scans each line for the marked alternative
     """
     im_orig = cv2.imread(source_file)
 
@@ -281,7 +282,7 @@ def get_answers(source_file):
 
     cv2.drawContours(im_orig, corners, -1, (0, 255, 0), 3)
 
-    outmost = order_points(get_outmost_points(corners))
+    outmost = sort_points_counter_clockwise(get_outmost_points(corners))
 
     color_transf = perspective_transform(im_orig, outmost)
     normalized_transf = perspective_transform(im_normalized, outmost)
