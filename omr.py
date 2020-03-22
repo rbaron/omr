@@ -8,6 +8,8 @@ import numpy as np
 # corner maps to a TRANSF_SIZE x TRANSF_SIZE square image.
 TRANSF_SIZE = 512
 
+N_QUESTIONS = 10
+
 # Answer sheet geometry in pixels
 ANSWER_SHEET_WIDTH = 740
 ANSWER_SHEET_HEIGHT = 1049
@@ -196,12 +198,12 @@ def sheet_coord_to_transf_coord(x, y):
     )))
 
 
-def get_question_patch(transf, q_number):
+def get_question_patch(transf, question_index):
     """Exracts a region of interest (ROI) of a single question."""
     # Top left of question patch q_number
     tl = sheet_coord_to_transf_coord(
         ANSWER_PATCH_LEFT_MARGIN,
-        FIRST_ANSWER_PATCH_TOP_Y + ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
+        FIRST_ANSWER_PATCH_TOP_Y + ANSWER_PATCH_HEIGHT_WITH_MARGIN * question_index
     )
 
     # Bottom right of question patch q_number
@@ -209,13 +211,13 @@ def get_question_patch(transf, q_number):
         ANSWER_SHEET_WIDTH - ANSWER_PATCH_RIGHT_MARGIN,
         FIRST_ANSWER_PATCH_TOP_Y +
             ANSWER_PATCH_HEIGHT +
-            ANSWER_PATCH_HEIGHT_WITH_MARGIN * (q_number - 1)
+            ANSWER_PATCH_HEIGHT_WITH_MARGIN * question_index
     )
     return transf[tl[1]:br[1], tl[0]:br[0]]
 
 
 def get_question_patches(transf):
-    for i in range(1, 11):
+    for i in range(N_QUESTIONS):
         yield get_question_patch(transf, i)
 
 
@@ -252,14 +254,12 @@ def get_answers(source_file):
     """Run the full pipeline:
 
         - Load image
-        - Convert to grayscale
-        - Filter out high frequencies with a Gaussian kernel
-        - Apply threshold
+        - Normalize image
         - Find contours
         - Find corners among all contours
         - Find 'outmost' points of all corners
         - Apply perpsective transform to get a bird's eye view
-        - Scan each line for the marked answer
+        - Scan each line for the marked alternative
     """
 
     corner_features = calculate_corner_features()
@@ -276,18 +276,20 @@ def get_answers(source_file):
 
     outmost = order_points(get_outmost_points(corners))
 
-    transf = perspective_transform(im_orig, outmost)
+    color_transf = perspective_transform(im_orig, outmost)
+    normalized_transf = perspective_transform(im_normalized, outmost)
 
     answers = []
-    for i, q_patch in enumerate(get_question_patches(transf)):
+    for i, q_patch in enumerate(get_question_patches(normalized_transf)):
         alt_index = get_marked_alternative(get_alternative_patches(q_patch))
 
         if alt_index is not None:
-            draw_marked_alternative(q_patch, alt_index)
+            color_q_patch = get_question_patch(color_transf, i)
+            draw_marked_alternative(color_q_patch, alt_index)
 
         answers.append(get_letter(alt_index))
 
-    return answers, transf
+    return answers, color_transf
 
 
 def main():
