@@ -1,6 +1,5 @@
 import argparse
 import cv2
-import math
 import numpy as np
 
 # When the four corners are identified, we will do a four-point
@@ -23,6 +22,7 @@ FIRST_ANSWER_PATCH_TOP_Y = 200
 ALTERNATIVE_HEIGHT = 50
 ALTERNATIVE_WIDTH = 50
 ALTERNATIVE_WIDTH_WITH_MARGIN = 100
+
 
 def calculate_contour_features(contour):
     """Calculates interesting properties (features) of a contour.
@@ -73,8 +73,9 @@ def calculate_corner_features():
     # contour (that is, it is _not_ the outer contour) to be the corner contour.
     # If in trouble, verify that this contour is the corner contour with
     # cv2.drawContours(corner_img, [corner_contour], -1, (255, 0, 0))
-    corner_contour = next(ct for i, ct in enumerate(contours)
-                             if hierarchy[0][i][3] != -1)
+    corner_contour = next(ct
+                          for i, ct in enumerate(contours)
+                          if hierarchy[0][i][3] != -1)
 
     return calculate_contour_features(corner_contour)
 
@@ -185,7 +186,6 @@ def perspective_transform(img, points):
         [TRANSF_SIZE, 0]],
         dtype="float32")
 
-    img_dest = img.copy()
     transf = cv2.getPerspectiveTransform(source, dest)
     warped = cv2.warpPerspective(img, transf, (TRANSF_SIZE, TRANSF_SIZE))
     return warped
@@ -210,8 +210,8 @@ def get_question_patch(transf, question_index):
     br = sheet_coord_to_transf_coord(
         ANSWER_SHEET_WIDTH - ANSWER_PATCH_RIGHT_MARGIN,
         FIRST_ANSWER_PATCH_TOP_Y +
-            ANSWER_PATCH_HEIGHT +
-            ANSWER_PATCH_HEIGHT_WITH_MARGIN * question_index
+        ANSWER_PATCH_HEIGHT +
+        ANSWER_PATCH_HEIGHT_WITH_MARGIN * question_index
     )
     return transf[tl[1]:br[1], tl[0]:br[0]]
 
@@ -224,7 +224,8 @@ def get_question_patches(transf):
 def get_alternative_patches(question_patch):
     for i in range(5):
         x0, _ = sheet_coord_to_transf_coord(ALTERNATIVE_WIDTH_WITH_MARGIN * i, 0)
-        x1, _ = sheet_coord_to_transf_coord(ALTERNATIVE_WIDTH + ALTERNATIVE_WIDTH_WITH_MARGIN * i, 0)
+        x1, _ = sheet_coord_to_transf_coord(ALTERNATIVE_WIDTH +
+                                            ALTERNATIVE_WIDTH_WITH_MARGIN * i, 0)
         yield question_patch[:, x0:x1]
 
 
@@ -270,9 +271,6 @@ def get_answers(source_file):
     - Apply perpsective transform to get a bird's eye view
     - Scan each line for the marked alternative
     """
-
-    corner_features = calculate_corner_features()
-
     im_orig = cv2.imread(source_file)
 
     im_normalized = normalize(im_orig)
@@ -338,4 +336,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
