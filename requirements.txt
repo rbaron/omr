@@ -6,7 +6,7 @@ numpy==1.17.4
 opencv-python==4.2.0.32
 packaging==19.2
 pluggy==0.13.0
-py==1.8.0
+py==1.10.0
 pyparsing==2.4.5
 pytest==5.2.4
 six==1.13.0
