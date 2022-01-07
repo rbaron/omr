@@ -46,6 +46,7 @@ And got the following output:
 $ git clone https://github.com/rbaron/omr
 $ cd omr/
 $ virtualenv --python=`which python3` venv
+$ source venv/bin/activate
 (venv) $ pip install -r requirements.txt
 (venv) $ python omr.py --help
 ```
