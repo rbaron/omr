@@ -41,6 +41,18 @@ And got the following output:
 <img src="http://i.imgur.com/4n9fKFF.png" alt="Output" style="max-width: 50%;"/>
 
 ## Installation
+### Using pipenv with pyenv
+Install [pyenv](https://github.com/pyenv/pyenv)
+```sh
+$ git clone https://github.com/rbaron/omr
+$ cd omr/
+$ pyenv install 3.7.5
+$ pyenv local 3.7.5
+$ pipenv --python 3.7.5
+$ pipenv install
+$ pipenv shell
+$ py.test
+```
 ### Using virtualenv
 ```sh
 $ git clone https://github.com/rbaron/omr
